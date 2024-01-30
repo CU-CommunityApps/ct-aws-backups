@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Resources for Cornell standard SomeResource. Do not alter. Contact cloud-support@cornell.edu with questions.
+
+Metadata:
+  Source: https://github.com/CU-CommunityApps/cu-aws-cloudformation/template-template/template.yaml
+  Version: "1.0.1"
+  RecommendedStackName: $ENV-recommended-stack-name
+  ChangeLog:
+    "1.0.1":
+      - added change log
+      - added deployment script
+      - added EnvironmentParam
+      - added DocumentationURLParam
+    "1.0.0":
+      - inital release
+
+Parameters:
+
+  VersionParam:
+    Description: CIT template version
+    Type: String
+    
+  ContactEmailParam:
+    Description: CIT contact email tag value version
+    Default: cloud-support@cornell.edu
+    Type: String
+    
+  SourceURLParam:
+    Description: URL of this template in source code repository (not necessarily public)
+    Default: https://github.com/CU-CommunityApps/cu-aws-cloudformation/template-template/template.yaml
+    Type: String
+
+  EnvironmentParam:
+    Description: Environment for the resources this template creates.
+    Default: dev
+    Type: String
+    AllowedValues:
+      - dev
+      - test
+      - prod
+  
+  DocumentationURLParam:
+    Description: URL of documentation about this deployment or these resources
+    Default: https://confluence.cornell.edu/documentation/of/this/deployment
+    Type: String
+
+Mappings: {}
+
+Conditions: {} 
+
+Resources:
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      Tags:
+        - Key: "Name"
+          Value: "rlp243-CF-BranchingTest"
+        - Key: Environment
+          Value: !Ref EnvironmentParam
+        - Key: Description
+          Value: "Ubuntu EC2 Instance for Testing"
+        - Key: Documentation
+          Value: !Ref DocumentationURLParam
+        - Key: cit:contact-email
+          Value: !Ref ContactEmailParam
+        - Key: cit:version
+          Value: !Ref VersionParam
+        - Key: cit:source
+          Value: !Ref SourceURLParam
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sdh"
+          Ebs:
+            VolumeSize: 10
+            DeleteOnTermination: true
+            VolumeType: gp2
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-0c7217cdde317cfec # Ubuntu Server 22.04 LTS (HVM),EBS General Purpose (SSD) Volume Type

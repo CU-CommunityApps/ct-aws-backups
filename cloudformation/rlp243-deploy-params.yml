@@ -1,0 +1,4 @@
+template-file-path: cloudformation/stackset-rlp243-test.yml
+parameters:
+  VersionParam: 1.0.0
+tags: {}
