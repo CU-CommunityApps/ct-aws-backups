@@ -54,82 +54,22 @@ Conditions: {}
 
 Resources:
 
-  MyEC2Instance1:
-    Type: AWS::EC2::Instance
-    Properties:
-      InstanceType: t2.micro
-      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
-      Tags:
-        - Key: "Name"
-          Value: "gitsync-awsbackup1"
-        - Key: "cit:backup-scheme"
-          Value: "default"
-        - Key: Environment
-          Value: !Ref EnvironmentParam
-        - Key: Description
-          Value: "Ubuntu EC2 Instance for Testing"
-        - Key: Documentation
-          Value: !Ref DocumentationURLParam
-        - Key: cit:contact-email
-          Value: !Ref ContactEmailParam
-        - Key: cit:version
-          Value: !Ref VersionParam
-        - Key: cit:source
-          Value: !Ref SourceURLParam
-      BlockDeviceMappings:
-        - DeviceName: "/dev/sdh"
-          Ebs:
-            VolumeSize: 10
-            DeleteOnTermination: true
-            VolumeType: gp2
-      
-  # MyEC2Instance2:
-  #   Type: AWS::EC2::Instance
-  #   Properties:
-  #     InstanceType: t2.micro
-  #     ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
-  #     Tags:
-  #       - Key: "Name"
-  #         Value: "gitsync-awsbackup2"
-  #       - Key: "cit:backup-scheme"
-  #         Value: "default"
-  #       - Key: Environment
-  #         Value: !Ref EnvironmentParam
-  #       - Key: Description
-  #         Value: "Ubuntu EC2 Instance for Testing"
-  #       - Key: Documentation
-  #         Value: !Ref DocumentationURLParam
-  #       - Key: cit:contact-email
-  #         Value: !Ref ContactEmailParam
-  #       - Key: cit:version
-  #         Value: !Ref VersionParam
-  #       - Key: cit:source
-  #         Value: !Ref SourceURLParam
-  #     BlockDeviceMappings:
-  #       - DeviceName: "/dev/sdh"
-  #         Ebs:
-  #           VolumeSize: 5
-  #           DeleteOnTermination: true
-  #           VolumeType: gp2
-
-  # ~~~ Backup ~~~ #
-
   # Backup Vault
-  sandboxVault:
+  citVault:
     Type: AWS::Backup::BackupVault
     Properties:
-      BackupVaultName: sandboxVault
+      BackupVaultName: citVault
       # You can also set encryption settings and access policies here
 
   # Backup Plan
-  sandboxBackupPlan:
+  citBackupPlan:
     Type: AWS::Backup::BackupPlan
     Properties:
       BackupPlan:
-        BackupPlanName: sandboxBackupPlan
+        BackupPlanName: citBackupPlan
         BackupPlanRule:
           - RuleName: DailyBackup
-            TargetBackupVault: !Ref sandboxVault
+            TargetBackupVault: !Ref citVault
             ScheduleExpression: cron(0 9 * * ? *)  # Daily at 04:00 AM EST (09:00 PM UTC)
             StartWindowMinutes: 60
             CompletionWindowMinutes: 120
@@ -137,7 +77,7 @@ Resources:
               DeleteAfterDays: 7  # Retain backup for 7 days
 
   # IAM Role for AWS Backup
-  sandboxIAMrole:
+  citIAMrole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -176,10 +116,10 @@ Resources:
   BackupSelection:
     Type: AWS::Backup::BackupSelection
     Properties:
-      BackupPlanId: !Ref sandboxBackupPlan
+      BackupPlanId: !Ref citBackupPlan
       BackupSelection:
         SelectionName: AllInstancesSelection
-        IamRoleArn: !GetAtt sandboxIAMrole.Arn
+        IamRoleArn: !GetAtt citIAMrole.Arn
         ListOfTags:
           - ConditionType: STRINGEQUALS
             ConditionKey: "cit:backup-scheme"
