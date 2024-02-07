@@ -140,7 +140,13 @@ Repository used for creating aws backups.
 ### Creating Cloudformation Stack
 *This process requires there to be a destination git repo*
 
-1. Navigate to "*AWS Cloudformation*" > Select "**Stacks**" > Open "**Create stack**" drop-down > Select "**With new resources (standard)**"
+1. Navigate to "*AWS Cloudformation*"
+
+- Select "**Stacks**"
+
+- Open "**Create stack**" drop-down
+
+- Select "**With new resources (standard)**"
 
 ![cf1](img/cf1.png)
 
