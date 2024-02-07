@@ -195,3 +195,18 @@ tags: {}
 
 5. This page just reviews over the options selected. Select "**Submit**".
 
+### Cloudformation Gitsync
+*Once the stack is created it should automatically trigger a clone of the last commit to build the stack using the provided templates and stackset files.*
+
+![gs1](img/gs1.png)
+
+Once completed, Cloudformation has now created a stack that built AWS Backups. Any Changes to the `deploy` branch (or coresponding branch configured on Step 3c above) will trigger this stackset to clone the newest commit and redeploy with the stackset.yml file pointed to by the template (`deploy-params.yml`)
+
+![gs2](img/gs2.png)
+
+### AWS Backups
+*This process uses AWS AMIs to create backups of instances within the environment.*
+
+To have this process backup any instance it must have the following Tag and Value on the instance Tags:
+
+
