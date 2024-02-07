@@ -19,6 +19,7 @@ Repository used for creating aws backups.
 
 - [**IAM Role**](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-prereq.html#git-sync-prereq-iam): An IAM role needs to be created with the permissions noted in linked AWS documentation.
 - **Cloudformation**: Permissions to create AWS Cloudformation Stacks
+- **Cloudformation IAM Role**: A role needs to be available for Cloudformation stack to use to create multiple resouces across the account. (*Creating Cloudformation Stack - Step 4*)
 
 
 ### Creating IAM role
@@ -209,4 +210,7 @@ Once completed, Cloudformation has now created a stack that built AWS Backups. A
 
 To have this process backup any instance it must have the following Tag and Value on the instance Tags:
 
+- Tag Name: `cit:backup-scheme`
+- Tag Value: `default`
 
+![ab1](img/ab1.png)
