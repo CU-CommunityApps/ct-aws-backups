@@ -61,9 +61,9 @@ Resources:
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
       Tags:
         - Key: "Name"
-          Value: "documentation-gitsync-awsbackup1"
-        - Key: "Backup"
-          Value: "true"
+          Value: "ct-gitsync-awsbackup1"
+        - Key: "cit:backup-scheme"
+          Value: "default"
         - Key: Environment
           Value: !Ref EnvironmentParam
         - Key: Description
