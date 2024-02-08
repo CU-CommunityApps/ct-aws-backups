@@ -15,5 +15,8 @@ Repository used for creating aws backups.
 
 ---
 
-[Step-by-Step Guide for Deploying AWS Backup Service](step-by-step/README.md)
-
+Resource Links:
+- [Cornell AWS Service Information](https://confluence.cornell.edu/display/CLOUD/AWS+Backup+Service+Information)
+- [Step-by-Step Guide for Deploying AWS Backup Service](step-by-step/README.md)
+- [AWS Backup pricing](https://aws.amazon.com/backup/pricing/)
+- [What is AWS Backup?](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#features-by-resource)
