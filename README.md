@@ -12,6 +12,7 @@ The purpose of this process is to give a repo to a group and connect Cloudformat
 ---
 
 #### Change Log:
+- 2024.02.08: Update Step-by-Step, Removed Test Instance
 - 2024.02.07: Updating with process documentation for implementing via Cloudformation Gitsync
 
 ---
@@ -21,3 +22,13 @@ Resource Links:
 - [Step-by-Step Guide for Deploying AWS Backup Service](step-by-step/README.md): How to guide
 - [AWS Backup pricing](https://aws.amazon.com/backup/pricing/): Pay by storage used (*Warm vs Cold Storage & Restores*). This is a GB per month cost (*No AWS Backup Service costs*).
 - [What is AWS Backup?](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#features-by-resource): Additional Information about the capabilities of the AWS Service
+
+---
+
+#### Test Instance (_Commented Code_)
+
+*:warning: Normally commented code is not left within a configuration but this code can be useful for testing.*
+
+Commented code within [stackset.yml](cloudformation/stackset.yml) `MyEC2Instance1` was left for anyone wanting to fork this repo and create a test EC2 instance with the appropriate tag.
+- Tag Name: `cit:backup-scheme`
+- Tag Value: `default`
