@@ -214,3 +214,197 @@ To have this process backup any instance it must have the following Tag and Valu
 - Tag Value: `default`
 
 ![ab1](img/ab1.png)
+
+---
+
+### Github Repo & Git Sync
+
+Creating protected branch for PR requirements. This process can Only be done using Github Teams or Github Enterprise.
+
+After making a new repo go into settings and place branch protection rules on the branch required to have a Pull Request merged into the branch. The suggested idea for this is to leave the default branch main and create a new branch called deploy. Any new merge/commit to this branch will create gitsync to perform a clone of the latest commit and run the cloudformation stack.
+
+- From Code in Github repo select dropdown for branches 
+- Add branch name (`deploy`) 
+- Select "**Create branch deploy from main**" (default branch)
+
+![gh1](img/gh1.png)
+
+- Github "**Settings**" for repo
+- Branches
+- Click "**Add branch protection rule**" 
+
+![gh2](img/gh2.png)
+
+- In "*Branch name pattern*" input "`deploy`"
+- Check "**Require a pull request before merging**"
+- Verify "**Require Approvals**" is set to 1 
+
+![gh3](img/gh3.png)
+
+- Scroll to the down and select "**Do not allow bypassing the above settings**"
+- Select "**Save Changes**" 
+
+![gh4](img/gh4.png)
+
+This branch is now protected and can not be directly merged to unless there is a Pull Request approved before merging. This process can be overwritten and force merged but those enforced rules can be implemented when the team has agreed to what level of branch protect the team is expecting to follow.
+
+---
+
+### Creating a Github PR to Trigger new deploy
+
+When Attempting to push to the "**deploy**" branch directly you should get a similar output due to the branch rule set up previously:
+
+```bash
+Performing git push on
+Repo: ct-aws-gitsync-demo
+BRANCH: deploy
+
+Review changes:
+diff --git a/stackset.yml b/stackset.yml
+index 8d53f80..6db71ec 100644
+--- a/stackset.yml
++++ b/stackset.yml
+@@ -132,7 +132,7 @@ Resources:
+         BackupPlanRule:
+           - RuleName: DailyBackup
+             TargetBackupVault: !Ref documentationvault
+-            ScheduleExpression: cron(0 16 * * ? *)  # Daily at 9:00 AM EST (2:00 PM UTC)
++            ScheduleExpression: cron(30 16 * * ? *)  # Daily at 9:00 AM EST (2:00 PM UTC)
+             StartWindowMinutes: 60
+             CompletionWindowMinutes: 120
+             Lifecycle:
+
+Commit Message: > updating schedule directly on deploy
+
+Adding changes...
+[deploy 533859c] updating schedule directly on deploy
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Pushing with commit message: updating schedule directly on deploy
+
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 305 bytes | 305.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+remote: error: GH006: Protected branch update failed for refs/heads/deploy.
+remote: error: Changes must be made through a pull request.
+To github.com:CU-CommunityApps/ct-aws-gitsync-demo.git
+ ! [remote rejected] deploy -> deploy (protected branch hook declined)
+error: failed to push some refs to 'github.com:CU-CommunityApps/ct-aws-gitsync-demo.git'
+```
+
+- Create a new github branch from "deploy" branch:
+
+![gh5](img/gh5.png)
+
+```bash
+❯ git checkout deploy
+branch 'deploy' set up to track 'origin/deploy'.
+Switched to a new branch 'deploy'
+❯ git checkout -b deploy-rlp243-DocPRtrigger
+Switched to a new branch 'deploy-rlp243-DocPRtrigger'
+```
+
+
+
+- Make any new stack changes to the yml 
+- Update the branch with a push and create a new PR from link provided:
+
+![gh6](img/gh6.png)
+
+```bash
+❯ git checkout deploy
+branch 'deploy' set up to track 'origin/deploy'.
+Switched to a new branch 'deploy'
+❯ git checkout -b deploy-rlp243-DocPRtrigger
+Switched to a new branch 'deploy-rlp243-DocPRtrigger'
+❯ git add .
+❯ git commit -m "new schedule time for documentation PR trigger"
+[deploy-rlp243-DocPRtrigger acdd6c0] new schedule time for documentation PR trigger
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+❯ git push
+fatal: The current branch deploy-rlp243-DocPRtrigger has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin deploy-rlp243-DocPRtrigger
+
+To have this happen automatically for branches without a tracking
+upstream, see 'push.autoSetupRemote' in 'git help config'.
+
+❯ git push --set-upstream origin deploy-rlp243-DocPRtrigger
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 311 bytes | 311.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+remote:
+remote: Create a pull request for 'deploy-rlp243-DocPRtrigger' on GitHub by visiting:
+remote:      https://github.com/CU-CommunityApps/ct-aws-gitsync-demo/pull/new/deploy-rlp243-DocPRtrigger
+remote:
+To github.com:CU-CommunityApps/ct-aws-gitsync-demo.git
+ * [new branch]      deploy-rlp243-DocPRtrigger -> deploy-rlp243-DocPRtrigger
+branch 'deploy-rlp243-DocPRtrigger' set up to track 'origin/deploy-rlp243-DocPRtrigger'.
+```
+
+*Using Ctrl+Click in the terminal should jump to the Pull Request creation page in Github.*
+
+- Change the merge destination branch to "**deploy**". 
+> Normally you would expect that the merge would be to the branch you originally branched off of but this process seems to auto select the default branch for the repo. This might need to create the default branch in the repo to "deploy" to eliminate this one step and simplify the process.
+
+![gh7](img/gh7.png)
+
+
+- Update Title to be more descriptive of PR
+- Update Description
+- Assign yourself and/or persons taking responsibility
+- Review Changes at the bottom
+- Select "**Create pull request**"
+
+![gh8](img/gh8.png)
+
+If Rules are working as expected you should see the PR is blocked as it needs at least 1 person's approval to merge into "**deploy**" branch
+
+![gh9](img/gh9.png)
+
+Make a request to persons able to review. If you are the "Reviewer" make comments for any changes or alterations. 
+- Select "**Files changed**" 
+- *To Approve:* Select "**Review changes**"
+- Add a comment
+- Select "**Approve**" radial
+- Select "**Submit review**" 
+
+![gh10](img/gh10.png)
+
+As long as there aren't any conflicts you should be able to merge. It is best practice for the person creating the PR for merging is the one to perform the merge and verify the merge does not break anything.
+
+- Select "**Merge**"
+
+![gh11](img/gh11.png)
+
+- Select "**Confirm merge**"
+
+![gh12](img/gh12.png)
+
+> Depending on the team most teams tend to delete merged branches to keep the repo clean. For this instance I will be deleting as this is only created for documentation purposes.
+> ![gh13](img/gh13.png)
+
+---
+
+Once this PR merges into "**deploy**" branch the Cloudformation stack will notice the commit change in the "**deploy**" branch from the merge and trigger the redeploy of the changes. 
+
+![cf5](img/cf5.png)
+
+This PR changes updated the AWS Backup schedule to be 16:30 UTC (11:30 EST). 
+
+> *Note: If Cloudformation redeploys a stack you will need to navigate to the plan again as it is a new plan it created in place.*
+
+![ab2](img/ab2.png)
+
+Once the scheduled cron runs the job it creates an EC2 Instance type (AMI Resource). Performing a restore of this instance redeploys the entirety of the instance.
+
+![ab3](img/ab3.png)
