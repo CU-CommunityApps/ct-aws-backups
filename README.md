@@ -25,6 +25,16 @@ Resource Links:
 
 ---
 
+#### Suggested Repo Use
+*Due to the way Gitsync polls the repo branch for commit changes this is the suggested way to create and run this repo.*
+
+- *Default Branch*: `deploy` This branch will be used to trigger the deployment.
+- *Stable Branch*: `master` or `main` This should be used for stable deployments. Once a deployment succeeds this branch should have the latest successful deployment. This branch is considered stable so it can be merged into deploy if a deployment fails.
+
+The [Step-by-Step Guide](step-by-step/README.md) has this process for creating the repo in this way and locks the repo down to require a Pull request being created from a branch off of `deploy` branch. This follows the gitflow process requiring 1 review of the Pull Request to merge and trigger the deployment.
+
+---
+
 #### Test Instance (_Commented Code_)
 
 *:warning: Normally commented code is not left within a configuration but this code can be useful for testing.*
@@ -32,3 +42,5 @@ Resource Links:
 Commented code within [stackset.yml](cloudformation/stackset.yml) `MyEC2Instance1` was left for anyone wanting to fork this repo and create a test EC2 instance with the appropriate tag.
 - Tag Name: `cit:backup-scheme`
 - Tag Value: `default`
+
+---
