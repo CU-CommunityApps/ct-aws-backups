@@ -153,7 +153,8 @@ Repository used for creating aws backups.
 
 - Select "*I am providing my own file in my repository.*" radial
 
-- Select "*Link a Git repository*" radial
+- Select "*Link a Git repository*" radial (**Verify *Error Warning* Below**)
+> #### :warning: ***Error Warning***: If a Link has already been created using this process please choose the connection using the "**Choose a linked Git repository**"!
 
 - Select "*Github*" radial
 
