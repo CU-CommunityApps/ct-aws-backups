@@ -57,6 +57,9 @@ This is used to target a specific AMI being used when deploying the test EC2 ins
 
 This code is originally commented out so that the initial deployment does not create a new EC2 instance. This section of the code can be uncommented and will allow for a small EC2 instance to be deployed with the `cit:backup-scheme`=`default` tag.
 
+:warning: ***<ins>ATTENTION:</ins>*** This block is commented out and will not be deployed unless added to the used configuration by uncommenting this block. This is defaulted to not deploy due to this being a small test instance and the use of Service Catalog Templates. 
+> **To uncomment out this block remove all `# ` before each line in the block of configurations shown above for `MyEC2Instance1` inside of `stackset.yml`.**
+
 
 | **Attribute** | **Value** | **Notes** |
 |:-:|:-:|:-:|
