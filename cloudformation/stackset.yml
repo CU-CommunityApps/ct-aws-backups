@@ -56,6 +56,8 @@ Resources:
 
   # MyEC2Instance1:
   #   Type: AWS::EC2::Instance
+  #   DeletionPolicy: RetainExceptOnCreate
+  #   UpdateReplacePolicy: Retain
   #   Properties:
   #     InstanceType: t2.micro
   #     ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
@@ -86,6 +88,7 @@ Resources:
   # Backup Vault
   citVault:
     Type: AWS::Backup::BackupVault
+    UpdateReplacePolicy: Retain
     Properties:
       BackupVaultName: citVault
       # You can also set encryption settings and access policies here
@@ -93,6 +96,7 @@ Resources:
   # Backup Plan
   citBackupPlan:
     Type: AWS::Backup::BackupPlan
+    UpdateReplacePolicy: Retain
     Properties:
       BackupPlan:
         BackupPlanName: citBackupPlan
@@ -108,6 +112,8 @@ Resources:
   # IAM Role for AWS Backup
   citIAMrole:
     Type: AWS::IAM::Role
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -144,6 +150,7 @@ Resources:
 
   BackupSelection:
     Type: AWS::Backup::BackupSelection
+    UpdateReplacePolicy: Retain
     Properties:
       BackupPlanId: !Ref citBackupPlan
       BackupSelection:
