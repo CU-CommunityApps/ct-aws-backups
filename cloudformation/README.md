@@ -2,9 +2,7 @@
 
 ### deploy-params.yml
 
-`template-file-path: cloudformation/stackset.yml`: This points to the stackset.yml which is used for the resource deployments.
-
-:warning: **Deployment Parameters:** This file is the first set of parameters to update for the environment. These will be passed to the stack deployment and overwrite any default values originally set in the stack deployment.
+:warning: **Deployment Parameters:** This file is the first set of parameters to update for the environment. These will be passed to the stack deployment and overwrite any default values originally set in the stack deployment. If there is a need to change anything within the `cloudformation/stackset.yml`, there should be a basic knowledge of Cloudformation and how stacks are creating AWS Services.
 
 ```yml
 template-file-path: cloudformation/stackset.yml
@@ -22,6 +20,8 @@ parameters:
 tags: {}
 ```
 
+#### Default Parameter Values
+
 | **Parameter** | **Default Value** | **Notes** |
 |:-:|:-:|:-:|
 | VersionParam | 1.0.0 | |
@@ -34,8 +34,6 @@ tags: {}
 | `BackupRetention` | `7` | Retain for number of days |
 | `BackupTagName` | `"cit:backup-scheme"` | Key value of Tag |
 | `BackupTagValue` | `"default"` | Value of Tag set for instance with value to be backed up |
-
-
 
 ---
 
@@ -90,9 +88,8 @@ This is used to target a specific AMI being used when deploying the test EC2 ins
 
 This code is originally commented out so that the initial deployment does not create a new EC2 instance. This section of the code can be uncommented and will allow for a small EC2 instance to be deployed with the `cit:backup-scheme`=`default` tag.
 
-:warning: ***<ins>ATTENTION:</ins>*** This block is commented out and will not be deployed unless added to the used configuration by uncommenting this block. This is defaulted to not deploy due to this being a small test instance and the use of Service Catalog Templates. 
+:warning: ***<ins>ATTENTION:</ins>*** This block is commented out and will not be deployed unless added to the used configuration by uncommenting this block. This is defaulted to not deploy due to this being a small test instance. 
 > **To uncomment out this block remove all `# ` before each line in the block of configurations shown above for `MyEC2Instance1` inside of `stackset.yml`.**
-
 
 | **Attribute** | **Value** | **Notes** |
 |:-:|:-:|:-:|
@@ -152,6 +149,7 @@ This section creates a vault within AWS Backup service. The [UpdateReplacePolicy
             Lifecycle:
               DeleteAfterDays: !Ref BackupRetention
 ```
+
 This sets the scheduling time, time for backup start, time allowed to complete backup and how long to keep the backups for. It is important to note
 
 | **Attribute** | **Value** | **Default Value** | **Notes** |
@@ -234,12 +232,13 @@ BackupSelection:
             ConditionKey: !Ref BackupTagName
             ConditionValue: !Ref BackupTagValue
 ```
+
 | **Attribute** | **Value** | **Default Value** | **Notes** |
 |:-:|:-:|:-:|:-:|
 | `Type` | `AWS::Backup::BackupSelection` | | The AWS resource type for creating a backup selection. |
 | `BackupPlanId` | `!Ref BackupPlan` | `backupPlan` | Reference to the backup plan ID this selection is associated with. |
 | `IamRoleArn` | `!GetAtt citIAMrole.Arn` | | The ARN of the IAM role that AWS Backup uses to authenticate when backing up the selected resources. |
-| `ConditionType` | | `STRINGEQUALS` | | The type of condition applied to the AWS resource tags for selection. |
+| `ConditionType` | `STRINGEQUALS` | | The type of condition applied to the AWS resource tags for selection. |
 | `ConditionKey` | `!Ref BackupTagName` | `"cit:backup-scheme"` | The key of the tag for which the condition is applied. |
 | `ConditionValue` | `!Ref BackupTagValue` | `"default"` | The value of the tag that must be met for the condition to apply. |
 
