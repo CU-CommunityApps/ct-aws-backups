@@ -8,6 +8,6 @@ parameters:
   BackupStartWindow: 60 # A value in minutes the backup must start by.
   BackupCompletionWindow: 120 # number of minutes to complete backup
   BackupRetention: 7 # retain for number of days
-  TagName: "cit:backup-scheme" # Key value of Tag
-  TagValue: "default" # Value of Tag set for instance with value to be backed up
+  BackupTagName: "cit:backup-scheme" # Key value of Tag
+  BackupTagValue: "default" # Value of Tag set for instance with value to be backed up
 tags: {}
