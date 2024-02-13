@@ -42,7 +42,52 @@ Parameters:
   
   DocumentationURLParam:
     Description: URL of documentation about this deployment or these resources
-    Default: https://confluence.cornell.edu/documentation/of/this/deployment
+    Default: https://confluence.cornell.edu/pages/viewpage.action?spaceKey=CLOUD&title=AWS+Backup+Service+Deployment+Process+via+Cloudformation+Gitsync
+    Type: String
+
+  BackupVaultName:
+    Description: Name of the backup vault created in AWS Backup Service where restore points are stored
+    Default: backupVault
+    Type: String
+    
+  BackupPlanName:
+    Description: Name of the backup plan created in AWS Backup Service
+    Default: backupPlan
+    Type: String
+
+  BackupPlanRuleName:
+    Description: Name of Backup rule name
+    Default: DailyBackup
+    Type: String
+  
+  BackupRunTime:
+    Description: Cron expression to specify backup time
+    Default: cron(0 9 * * ? *)  # Daily at 04:00 AM EST (09:00 PM UTC)
+    Type: String
+
+  BackupStartWindow:
+    Description: A value in minutes the backup must start by.
+    Default: 60
+    Type: Number
+  
+  BackupCompletionWindow:
+    Description: A value in minutes after a backup job is successfully started before it must be completed or it is canceled by AWS Backup.
+    Default: 120
+    Type: Number
+
+  BackupRetention:
+    Description: Specifies the number of days after creation that a recovery point is deleted.
+    Default: 7 # Retain backup for 7 days
+    Type: Number
+
+  TagName:
+    Description: ConditionKey value
+    Default: "cit:backup-scheme"
+    Type: String
+
+  TagValue:
+    Description: Value of Tag set for instance with value to be backed up
+    Default: "default"
     Type: String
 
 Mappings: 
@@ -62,7 +107,7 @@ Resources:
   #     ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
   #     Tags:
   #       - Key: "Name"
-  #         Value: "ct-gitsync-awsbackup1"
+  #         Value: "ec2backupTestInstance"
   #       - Key: "cit:backup-scheme"
   #         Value: "default"
   #       - Key: Environment
@@ -85,31 +130,31 @@ Resources:
   #           VolumeType: gp2
 
   # Backup Vault
-  citVault:
+  Vault:
     Type: AWS::Backup::BackupVault
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      BackupVaultName: citVault
+      BackupVaultName: !Ref BackupVaultName
       # You can also set encryption settings and access policies here
 
   # Backup Plan
-  citBackupPlan:
+  BackupPlan:
     Type: AWS::Backup::BackupPlan
     Properties:
       BackupPlan:
-        BackupPlanName: citBackupPlan
+        BackupPlanName: !Ref BackupPlanName
         BackupPlanRule:
-          - RuleName: DailyBackup
-            TargetBackupVault: !Ref citVault
-            ScheduleExpression: cron(0 9 * * ? *)  # Daily at 04:00 AM EST (09:00 PM UTC)
-            StartWindowMinutes: 60
-            CompletionWindowMinutes: 120
+          - RuleName: !Ref BackupPlanRuleName
+            TargetBackupVault: !Ref Vault
+            ScheduleExpression: !Ref BackupRunTime
+            StartWindowMinutes: !Ref BackupStartWindow
+            CompletionWindowMinutes: !Ref BackupCompletionWindow
             Lifecycle:
-              DeleteAfterDays: 7  # Retain backup for 7 days
+              DeleteAfterDays: !Ref BackupRetention
 
   # IAM Role for AWS Backup
-  citIAMrole:
+  IAMrole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -148,11 +193,11 @@ Resources:
   BackupSelection:
     Type: AWS::Backup::BackupSelection
     Properties:
-      BackupPlanId: !Ref citBackupPlan
+      BackupPlanId: !Ref BackupPlan
       BackupSelection:
         SelectionName: AllInstancesSelection
-        IamRoleArn: !GetAtt citIAMrole.Arn
+        IamRoleArn: !GetAtt IAMrole.Arn
         ListOfTags:
           - ConditionType: STRINGEQUALS
-            ConditionKey: "cit:backup-scheme"
-            ConditionValue: "default"
+            ConditionKey: !Ref TagName
+            ConditionValue: !Ref TagValue
