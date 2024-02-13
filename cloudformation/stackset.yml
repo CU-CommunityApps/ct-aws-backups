@@ -199,5 +199,5 @@ Resources:
         IamRoleArn: !GetAtt IAMrole.Arn
         ListOfTags:
           - ConditionType: STRINGEQUALS
-            ConditionKey: !Ref TagName
-            ConditionValue: !Ref TagValue
+            ConditionKey: !Ref BackupTagName
+            ConditionValue: !Ref BackupTagValue
