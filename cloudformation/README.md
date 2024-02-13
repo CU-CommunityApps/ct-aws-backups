@@ -2,7 +2,40 @@
 
 ### deploy-params.yml
 
-`template-file-path: cloudformation/stackset.yml`: This points to the stackset.yml which is used for the resource deployments
+`template-file-path: cloudformation/stackset.yml`: This points to the stackset.yml which is used for the resource deployments.
+
+:warning: **Deployment Parameters:** This file is the first set of parameters to update for the environment. These will be passed to the stack deployment and overwrite any default values originally set in the stack deployment.
+
+```yml
+template-file-path: cloudformation/stackset.yml
+parameters:
+  VersionParam: 1.0.0
+  BackupVaultName: backupVault # Name of the backup vault
+  BackupPlanName: backupPlan # Name of the backup plan
+  BackupPlanRuleName: DailyBackup # Name of Backup rule name
+  BackupRunTime: cron(0 9 * * ? *) # Daily at 04:00 AM EST (09:00 PM UTC)
+  BackupStartWindow: 60 # A value in minutes the backup must start by.
+  BackupCompletionWindow: 120 # number of minutes to complete backup
+  BackupRetention: 7 # retain for number of days
+  BackupTagName: "cit:backup-scheme" # Key value of Tag
+  BackupTagValue: "default" # Value of Tag set for instance with value to be backed up
+tags: {}
+```
+
+| **Parameter** | **Default Value** | **Notes** |
+|:-:|:-:|:-:|
+| VersionParam | 1.0.0 | |
+| `BackupVaultName` | `backupVault` | Name of the backup vault |
+| `BackupPlanName` | `backupPlan` | Name of the backup plan |
+| `BackupPlanRuleName` | `DailyBackup` | Name of Backup rule name |
+| `BackupRunTime` | `cron(0 9 * * ? *)` | Daily at 04:00 AM EST (09:00 PM UTC) |
+| `BackupStartWindow` | `60` | A value in minutes the backup must start by. |
+| `BackupCompletionWindow` | `120` | Number of minutes to complete backup |
+| `BackupRetention` | `7` | Retain for number of days |
+| `BackupTagName` | `"cit:backup-scheme"` | Key value of Tag |
+| `BackupTagValue` | `"default"` | Value of Tag set for instance with value to be backed up |
+
+
 
 ---
 
@@ -32,9 +65,9 @@ This is used to target a specific AMI being used when deploying the test EC2 ins
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
       Tags:
         - Key: "Name"
-          Value: "ct-gitsync-awsbackup1"
-        - Key: "cit:backup-scheme"
-          Value: "default"
+          Value: "ec2backupTestInstance"
+        - Key: !Ref BackupTagName
+          Value: !Ref BackupTagValue
         - Key: Environment
           Value: !Ref EnvironmentParam
         - Key: Description
@@ -67,8 +100,8 @@ This code is originally commented out so that the initial deployment does not cr
 | `DeletionPolicy` | `Delete` | Specifies the instance is deleted on removal. |
 | `InstanceType` | `t2.micro` | Specifies the instance type. |
 | `ImageId` | `!FindInMap [RegionMap, !Ref "AWS::Region", AMI]` | Maps the AMI based on the region. |
-| Tags - `Name` | `ct-gitsync-awsbackup1` | The name tag for the instance. |
-| Tags - `cit:backup-scheme`| `default` | Backup scheme tag value. |
+| Tags - `Name` | `ec2backupTestInstance` | The name tag for the instance. |
+| Tags - `!Ref BackupTagName` | `!Ref BackupTagValue` | Backup scheme tag value. (Parameterized Default Values: `cit:backup-scheme`=`default`) |
 | - | - | - |
 | BlockDeviceMappings - `DeviceName` | `"/dev/sdh"` | Specifies the device name for block device mapping. |
 | BlockDeviceMappings - `VolumeSize` | `10` | Specifies the volume size (in GB) for the EBS volume. |
@@ -80,12 +113,13 @@ This code is originally commented out so that the initial deployment does not cr
 #### AWS Backup Vault
 
 ```yml
-  citVault:
+  Vault:
     Type: AWS::Backup::BackupVault
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      BackupVaultName: citVault
+      BackupVaultName: !Ref BackupVaultName
+      # You can also set encryption settings and access policies here
 ```
 
 This section creates a vault within AWS Backup service. The [UpdateReplacePolicy attribute](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatereplacepolicy.html) = `retain` to verify if the vault is deleted that any backups are not lost accidentally. Normally any vault would not allow for deletion if the vault contains *any* restore points but this is configured as a percaution. 
@@ -97,39 +131,39 @@ This section creates a vault within AWS Backup service. The [UpdateReplacePolicy
 | `Type` | `AWS::Backup::BackupVault` | The AWS resource type for creating a backup vault. |
 | `UpdateReplacePolicy:` | `Retain` | `Retain`, `Delete`, `Snapshot` | [AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatereplacepolicy.html) Determines the policy to apply when the resource is replaced. |
 | `DeletionPolicy:` | `Retain` | `Retain`, `Delete`, `Snapshot`, `RetainExceptOnCreate` | [AWS Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-deletionpolicy.html) Determines the policy to apply when the resource is deleted. |
-| `BackupVaultName:` | `citVault` | This is the name used when creating the Vault in AWS Backup Service. |
+| `BackupVaultName:` | `!Ref BackupVaultName` | This is the name used when creating the Vault in AWS Backup Service. (Parameterized Default Name: `backupVault`) |
 
 ---
 
 #### AWS Backup Plan
 
 ```yml
-  citBackupPlan:
+  BackupPlan:
     Type: AWS::Backup::BackupPlan
     Properties:
       BackupPlan:
-        BackupPlanName: citBackupPlan
+        BackupPlanName: !Ref BackupPlanName
         BackupPlanRule:
-          - RuleName: DailyBackup
-            TargetBackupVault: !Ref citVault
-            ScheduleExpression: cron(0 9 * * ? *)  # Daily at 04:00 AM EST (09:00 PM UTC)
-            StartWindowMinutes: 60 
-            CompletionWindowMinutes: 120
+          - RuleName: !Ref BackupPlanRuleName
+            TargetBackupVault: !Ref Vault
+            ScheduleExpression: !Ref BackupRunTime
+            StartWindowMinutes: !Ref BackupStartWindow
+            CompletionWindowMinutes: !Ref BackupCompletionWindow
             Lifecycle:
-              DeleteAfterDays: 7  # Retain backup for 7 days
+              DeleteAfterDays: !Ref BackupRetention
 ```
 This sets the scheduling time, time for backup start, time allowed to complete backup and how long to keep the backups for. It is important to note
 
-| **Attribute** | **Value** | **Notes** |
-|:-:|:-:|:-:|
-| `Type` | `AWS::Backup::BackupPlan` | The AWS resource type for creating a backup plan. |
-| `BackupPlanName` | `citBackupPlan` | The name of the backup plan. |
-| `RuleName` | `DailyBackup` | The name given to the backup rule within the plan. |
-| `TargetBackupVault` | `!Ref citVault` | Reference to the backup vault where backups are stored. |
-| `ScheduleExpression` | `cron(0 9 * * ? *)` | Defines the backup schedule using cron expression. Daily at 09:00 UTC (04:00 AM EST). |
-| `StartWindowMinutes` | `60` | The backup operation must start within 60 minutes of the scheduled time. |
-| `CompletionWindowMinutes` | `120` | The backup operation must complete within 120 minutes after the start window begins. |
-| Lifecycle - `DeleteAfterDays`| `7` | Specifies the number of days after which the backup is to be deleted. |
+| **Attribute** | **Value** | **Default Value** | **Notes** |
+|:-:|:-:|:-:|:-:|
+| `Type` | `AWS::Backup::BackupPlan` | | The AWS resource type for creating a backup plan. |
+| `BackupPlanName` | `!Ref BackupPlanName` | `backupPlan` | The name of the backup plan. |
+| `RuleName` | `!Ref BackupPlanRuleName` | `DailyBackup` | The name given to the backup rule within the plan. |
+| `TargetBackupVault` | `!Ref Vault` | `backupVault` | Reference to the backup vault where backups are stored. |
+| `ScheduleExpression` | `!Ref BackupRunTime` | `cron(0 9 * * ? *)` | Defines the backup schedule using cron expression. Daily at 09:00 UTC (04:00 AM EST). |
+| `StartWindowMinutes` | `!Ref BackupStartWindow` | `60` | The backup operation must start within 60 minutes of the scheduled time. |
+| `CompletionWindowMinutes` | `!Ref BackupCompletionWindow` | `120` | The backup operation must complete within 120 minutes after the start window begins. |
+| Lifecycle - `DeleteAfterDays`| `!Ref BackupRetention` | `7` | Specifies the number of days after which the backup is to be deleted. |
 
 ---
 
@@ -191,23 +225,23 @@ This is the role created and used by the AWS Backup service to perform the backu
 BackupSelection:
     Type: AWS::Backup::BackupSelection
     Properties:
-      BackupPlanId: !Ref citBackupPlan
+      BackupPlanId: !Ref BackupPlan
       BackupSelection:
         SelectionName: AllInstancesSelection
-        IamRoleArn: !GetAtt citIAMrole.Arn
+        IamRoleArn: !GetAtt IAMrole.Arn
         ListOfTags:
           - ConditionType: STRINGEQUALS
-            ConditionKey: "cit:backup-scheme"
-            ConditionValue: "default"
+            ConditionKey: !Ref BackupTagName
+            ConditionValue: !Ref BackupTagValue
 ```
-| **Attribute** | **Value** | **Notes** |
-|:-:|:-:|:-:|
-| `Type` | `AWS::Backup::BackupSelection` | The AWS resource type for creating a backup selection. |
-| `BackupPlanId` | `!Ref citBackupPlan` | Reference to the backup plan ID this selection is associated with. |
-| `IamRoleArn` | `!GetAtt citIAMrole.Arn` | The ARN of the IAM role that AWS Backup uses to authenticate when backing up the selected resources. |
-| `ConditionType` | `STRINGEQUALS` | The type of condition applied to the AWS resource tags for selection. |
-| `ConditionKey` | `"cit:backup-scheme"` | The key of the tag for which the condition is applied. |
-| `ConditionValue` | `"default"` | The value of the tag that must be met for the condition to apply. |
+| **Attribute** | **Value** | **Default Value** | **Notes** |
+|:-:|:-:|:-:|:-:|
+| `Type` | `AWS::Backup::BackupSelection` | | The AWS resource type for creating a backup selection. |
+| `BackupPlanId` | `!Ref BackupPlan` | `backupPlan` | Reference to the backup plan ID this selection is associated with. |
+| `IamRoleArn` | `!GetAtt citIAMrole.Arn` | | The ARN of the IAM role that AWS Backup uses to authenticate when backing up the selected resources. |
+| `ConditionType` | | `STRINGEQUALS` | | The type of condition applied to the AWS resource tags for selection. |
+| `ConditionKey` | `!Ref BackupTagName` | `"cit:backup-scheme"` | The key of the tag for which the condition is applied. |
+| `ConditionValue` | `!Ref BackupTagValue` | `"default"` | The value of the tag that must be met for the condition to apply. |
 
 
 This configuration tells the backup service what resources to target for the backup. Using this Cloudformation Gitsync process, the target can be ARNs or Tags.
