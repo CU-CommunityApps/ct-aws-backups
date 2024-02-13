@@ -99,35 +99,35 @@ Conditions: {}
 
 Resources:
 
-  MyEC2Instance1:
-    Type: AWS::EC2::Instance
-    DeletionPolicy: Delete
-    Properties:
-      InstanceType: t2.micro
-      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
-      Tags:
-        - Key: "Name"
-          Value: "ec2backupTestInstance"
-        - Key: !Ref BackupTagName
-          Value: !Ref BackupTagValue
-        - Key: Environment
-          Value: !Ref EnvironmentParam
-        - Key: Description
-          Value: "Ubuntu EC2 Instance for Testing"
-        - Key: Documentation
-          Value: !Ref DocumentationURLParam
-        - Key: cit:contact-email
-          Value: !Ref ContactEmailParam
-        - Key: cit:version
-          Value: !Ref VersionParam
-        - Key: cit:source
-          Value: !Ref SourceURLParam
-      BlockDeviceMappings:
-        - DeviceName: "/dev/sdh"
-          Ebs:
-            VolumeSize: 10
-            DeleteOnTermination: true
-            VolumeType: gp2
+  # MyEC2Instance1:
+  #   Type: AWS::EC2::Instance
+  #   DeletionPolicy: Delete
+  #   Properties:
+  #     InstanceType: t2.micro
+  #     ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+  #     Tags:
+  #       - Key: "Name"
+  #         Value: "ec2backupTestInstance"
+  #       - Key: !Ref BackupTagName
+  #         Value: !Ref BackupTagValue
+  #       - Key: Environment
+  #         Value: !Ref EnvironmentParam
+  #       - Key: Description
+  #         Value: "Ubuntu EC2 Instance for Testing"
+  #       - Key: Documentation
+  #         Value: !Ref DocumentationURLParam
+  #       - Key: cit:contact-email
+  #         Value: !Ref ContactEmailParam
+  #       - Key: cit:version
+  #         Value: !Ref VersionParam
+  #       - Key: cit:source
+  #         Value: !Ref SourceURLParam
+  #     BlockDeviceMappings:
+  #       - DeviceName: "/dev/sdh"
+  #         Ebs:
+  #           VolumeSize: 10
+  #           DeleteOnTermination: true
+  #           VolumeType: gp2
 
   # Backup Vault
   Vault:
