@@ -4,7 +4,7 @@ parameters:
   BackupVaultName: backupVault # Name of the backup vault
   BackupPlanName: backupPlan # Name of the backup plan
   BackupPlanRuleName: DailyBackup # Name of Backup rule name
-  BackupRunTime: cron(0 9 * * ? *) # Daily at 04:00 AM EST (09:00 PM UTC)
+  BackupRunTime: cron(15 13 * * ? *) # Daily at 04:00 AM EST (09:00 PM UTC)
   BackupStartWindow: 60 # A value in minutes the backup must start by.
   BackupCompletionWindow: 120 # number of minutes to complete backup
   BackupRetention: 7 # retain for number of days
