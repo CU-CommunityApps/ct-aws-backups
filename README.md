@@ -5,13 +5,15 @@ The purpose of this process is to give a repo to a group and connect Cloudformat
 ---
 
 #### Change Log:
+- 2024.02.28: Created Public Access & Updated Full service offering documentation link
+- 2024.02.14: Announced Service Offering
 - 2024.02.08: Update Step-by-Step, Removed Test Instance
 - 2024.02.07: Updating with process documentation for implementing via Cloudformation Gitsync
 
 ---
 
 #### Resource Links:
-- [Cornell AWS Service Information](https://confluence.cornell.edu/display/CLOUD/AWS+Backup+Service+Information): Documentation based on POC
+- [Cornell AWS Service Information](https://confluence.cornell.edu/display/CLOUD/AWS+Backup+Service+via+Service+Catalog+or+Git+Sync): Full Documentation of service offering
 - [Step-by-Step Guide for Deploying AWS Backup Service](step-by-step/README.md): How to guide
 - [AWS Backup pricing](https://aws.amazon.com/backup/pricing/): Pay by storage used (*Warm vs Cold Storage & Restores*). This is a GB per month cost (*No AWS Backup Service costs*).
 - [What is AWS Backup?](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#features-by-resource): Additional Information about the capabilities of the AWS Service
