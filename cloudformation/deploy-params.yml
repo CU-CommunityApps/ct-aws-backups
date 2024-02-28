@@ -1,10 +1,19 @@
 template-file-path: cloudformation/stackset.yml
 parameters:
   VersionParam: 1.0.0
-  BackupVaultName: backupVault # Name of the backup vault
-  BackupPlanName: backupPlan # Name of the backup plan
+  BackupVaultName: backupVault-test # Name of the backup vault
+  BackupPlanName: backupPlan-test # Name of the backup plan
   BackupPlanRuleName: DailyBackup # Name of Backup rule name
+<<<<<<< HEAD
   BackupRunTime: cron(0 9 * * ? *) # Daily at 04:00 AM EST (09:00 PM UTC)
+=======
+  BackupMinute: "0" # The minute at which the backup should occur (0-59).
+  BackupHour: "9" # The hour at which the backup should occur (0-23 in UTC). 9am will be 4am EST
+  BackupDayOfMonth: "*" # The day of the month the backup should occur (1-31). Use '*' for every day
+  BackupMonth: "*" # The month in which the backup should occur (1-12). Use '*' for every month
+  BackupDayOfWeek: "?" # The day of the week the backup should occur (SUN-SAT). Use '?' if day of month is specified
+  BackupYear: "*" # The year for the backup schedule. Use '*' for every year
+>>>>>>> deploy
   BackupStartWindow: 60 # A value in minutes the backup must start by.
   BackupCompletionWindow: 120 # number of minutes to complete backup
   BackupRetention: 7 # retain for number of days

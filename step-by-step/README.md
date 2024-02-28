@@ -4,6 +4,7 @@ Repository used for creating aws backups.
 ---
 
 #### Change Log:
+- 2024.02.20: Update for release to customers
 - 2024.02.07: Updating with process documentation for implementing via Cloudformation Gitsync
 
 ---

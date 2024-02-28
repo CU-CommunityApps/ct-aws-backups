@@ -46,47 +46,77 @@ Parameters:
     Type: String
 
   BackupVaultName:
-    Description: Name of the backup vault created in AWS Backup Service where restore points are stored
+    Description: Name of the backup vault created in AWS Backup Service where restore points are stored.
     Default: backupVault
     Type: String
     
   BackupPlanName:
-    Description: Name of the backup plan created in AWS Backup Service
+    Description: Name of the backup plan created in AWS Backup Service.
     Default: backupPlan
     Type: String
 
   BackupPlanRuleName:
-    Description: Name of Backup rule name
+    Description: Name of Backup rule name. This is just the name of the rule used to specify the type of backup being performed.
     Default: DailyBackup
     Type: String
   
-  BackupRunTime:
-    Description: Cron expression to specify backup time
-    Default: cron(0 9 * * ? *)  # Daily at 04:00 AM EST (09:00 PM UTC)
+  BackupMinute:
     Type: String
+    Default: "0"
+    Description: "The minute at which the backup should occur (0-59)."
+
+  BackupHour:
+    Type: String
+    Default: "9"
+    Description: "The hour at which the backup should occur (0-23 in UTC). 9am will be 4am EST."
+
+  BackupDayOfMonth:
+    Type: String
+    Default: "*"
+    Description: "The day of the month the backup should occur (1-31). Use '*' for every day."
+
+  BackupMonth:
+    Type: String
+    Default: "*"
+    Description: "The month in which the backup should occur (1-12). Use '*' for every month."
+
+  BackupDayOfWeek:
+    Type: String
+    Default: "?"
+    Description: "The day of the week the backup should occur (SUN-SAT). Use '?' if day of month is specified."
+
+  BackupYear:
+    Type: String
+    Default: "*"
+    Description: "The year for the backup schedule. Use '*' for every year."
 
   BackupStartWindow:
-    Description: A value in minutes the backup must start by.
+    Description: A value in minutes the backup must start by. Must be between 60 (1 hour) and 259,200 (180 days).
     Default: 60
     Type: Number
-  
+    MinValue: 60
+    MaxValue: 259200
+
   BackupCompletionWindow:
-    Description: A value in minutes after a backup job is successfully started before it must be completed or it is canceled by AWS Backup.
+    Description: A value in minutes after a backup job is successfully started before it must be completed or it is canceled by AWS Backup. Must be at least as long as the BackupStartWindow.
     Default: 120
     Type: Number
+    MinValue: 60
+    MaxValue: 259200
 
   BackupRetention:
-    Description: Specifies the number of days after creation that a recovery point is deleted.
-    Default: 7 # Retain backup for 7 days
+    Description: Specifies the number of days after creation that a recovery point is deleted. Must be a positive, non-zero integer.
+    Default: 7
     Type: Number
+    MinValue: 1
 
   BackupTagName:
-    Description: ConditionKey value
+    Description: This is the name of the tag used to perform the backups.
     Default: "cit:backup-scheme"
     Type: String
 
   BackupTagValue:
-    Description: Value of Tag set for instance with value to be backed up
+    Description: Value of Tag set for an instance with set value to be backed up.
     Default: "default"
     Type: String
 
@@ -99,6 +129,7 @@ Conditions: {}
 
 Resources:
 
+<<<<<<< HEAD
   MyEC2Instance1:
     Type: AWS::EC2::Instance
     DeletionPolicy: Delete
@@ -128,6 +159,37 @@ Resources:
             VolumeSize: 10
             DeleteOnTermination: true
             VolumeType: gp2
+=======
+  # MyEC2Instance1:
+  #   Type: AWS::EC2::Instance
+  #   DeletionPolicy: Delete
+  #   Properties:
+  #     InstanceType: t2.micro
+  #     ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+  #     Tags:
+  #       - Key: "Name"
+  #         Value: "ec2backupTestInstance1"
+  #       - Key: !Ref BackupTagName
+  #         Value: !Ref BackupTagValue
+  #       - Key: Environment
+  #         Value: !Ref EnvironmentParam
+  #       - Key: Description
+  #         Value: "Ubuntu EC2 Instance for Testing"
+  #       - Key: Documentation
+  #         Value: !Ref DocumentationURLParam
+  #       - Key: cit:contact-email
+  #         Value: !Ref ContactEmailParam
+  #       - Key: cit:version
+  #         Value: !Ref VersionParam
+  #       - Key: cit:source
+  #         Value: !Ref SourceURLParam
+  #     BlockDeviceMappings:
+  #       - DeviceName: "/dev/sdh"
+  #         Ebs:
+  #           VolumeSize: 10
+  #           DeleteOnTermination: true
+  #           VolumeType: gp2
+>>>>>>> deploy
 
   # Backup Vault
   Vault:
@@ -147,7 +209,8 @@ Resources:
         BackupPlanRule:
           - RuleName: !Ref BackupPlanRuleName
             TargetBackupVault: !Ref Vault
-            ScheduleExpression: !Ref BackupRunTime
+            ScheduleExpression:
+              Fn::Sub: "cron(${BackupMinute} ${BackupHour} ${BackupDayOfMonth} ${BackupMonth} ${BackupDayOfWeek} ${BackupYear})"
             StartWindowMinutes: !Ref BackupStartWindow
             CompletionWindowMinutes: !Ref BackupCompletionWindow
             Lifecycle:
